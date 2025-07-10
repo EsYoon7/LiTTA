@@ -1,0 +1,80 @@
+### model
+asr: facebook/wav2vec2-base-960h
+processor: patrickvonplaten/wav2vec2-base-100h-with-lm
+
+### dataset
+# dataset_name: librispeech
+# dataset_dir: /home/server17/hdd/changhun_workspace/LibriSpeech
+dataset_name: chime
+dataset_dir: /home/server17/hdd/changhun_workspace/CHiME3
+# dataset_name: ted
+# dataset_dir: /home/server17/hdd/changhun_workspace/TEDLIUM_release2/test
+# dataset_name: valentini
+# dataset_dir: /home/server17/hdd/changhun_workspace/Valentini
+# dataset_name: commonvoice
+# dataset_dir: /home/server17/hdd/changhun_workspace/cv-corpus-5.1-2020-06-22/en
+
+extra_noise: 0.00
+noise_type: null # currently supported: null, AirConditioner_6, AirportAnnouncements_2, Babble_4, CopyMachine_2, Munching_3, Neighbor_6, ShuttingDoor_6, Typing_2, VacuumCleaner_1
+noise_snr: 10
+sample_rate: 16000
+batch_size: 1
+
+### device and amp
+device: cuda
+# use_amp: true
+
+### logging
+log_dir: exps/litta_ctc
+
+### seed for reproductivity
+seed: null
+
+### optimizer & train hyparameters & learning rate scheduler
+optimizer: AdamW
+train_params: [feature] # currently supported: all, feature, LN, linear(linear probing), enc, dec
+steps: 10
+episodic: true # load pretrained model again for every batch
+
+lr: 4e-5
+scheduler: CosineAnnealingLR # null or CosineAnnealingLR
+t_max: 10
+lr_min: 2e-5
+
+##################################################################
+### methods & other hyperparameters
+## currently supported methods: original, em_uncertainty, em_sparse, greedy_pseudo_labeling, ctc, beam_search_max, beam_search_all, beam_search_negative_sampling, diversity_maximization, renyi_em
+method: [renyi_em, beam_search_negative_sampling]
+decoding_method: beam_search # greedy_search or beam_search
+lm_coef: 0.3
+kld_weight: 0.0625 # 0, 0.0625(1/16), 0.125(1/8), 0.25(1/4), 9.5(1/2), ...
+
+### beam search
+beam_width: 5
+num_positives: 1 # for beam_search_all
+num_negatives: 4 # for beam_candidate for negtive_sampling
+
+temp: 2.5 # temperature scaling
+em_coef: 0.3 # for balancing entropy minimization and minimum class confusion for baseline
+not_blank: true
+certain_only: true
+
+### renyi entropy minimization
+renyi_entropy_alpha: 1.5 # 1, 2, ..., inf
+
+# negative sampling
+negative_sampling_method: ns3l # random, beam_candidate, ns3l
+ns_coef: 1
+ns_threshold: 0.04
+
+# thresholding
+prob_threshold: 0.9
+entropy_threshold: 0.05
+
+# llm parameters
+lm_model: openchat/openchat_3.5
+llm_model: openchat3.5
+tta_coef: 1.0 # test time adaptation loss coefficient
+llm_coef: 1.0 # llm loss coefficient
+
+##################################################################
